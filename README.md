@@ -1,11 +1,13 @@
 # parse-json
 
-Read a JSON object from the console, parse it in Go, assign the values to separate variables
+Read a JSON object from a **file**, parse it in Go, assign the values to separate variables
 and print them.
+
+> Branch `read-from-file`. The `main` branch reads the JSON from the console instead.
 
 ## What the program does
 
-1. Asks the user to enter a JSON object. It can be on one line or span several lines.
+1. Reads a JSON file – `person.json` by default, or the path given as an argument.
 2. Parses it into a `Person` struct with `encoding/json`.
 3. Assigns each value to its own variable (`name`, `age`, `email`, …).
 4. Prints every variable with its value and Go type.
@@ -38,51 +40,76 @@ type Person struct {
 - Missing keys keep the zero value of their type (`""`, `0`, `false`, `nil`). Extra keys
   that are not in the struct are ignored.
 
-## How the input is read
+## How the file is read
 
-`json.NewDecoder(os.Stdin).Decode(&person)` reads from the console until one complete JSON
-value has been entered, so the object can be typed or pasted over several lines.
+```go
+data, err := os.ReadFile(path)          // the whole file as []byte
+err = json.Unmarshal(data, &person)     // []byte -> struct
+```
+
+- `os.ReadFile` reads the whole file into memory. It returns an error if the file is
+  missing or cannot be read.
+- `json.Unmarshal` parses the bytes and fills the struct. It returns an error if the JSON is
+  invalid or a value has the wrong type.
+- The path comes from `os.Args[1]` if it is given, otherwise `person.json` is used.
+
+## Files
+
+| File | Content |
+|---|---|
+| `person.json` | default input |
+| `examples/ivan.json` | a second valid example |
+| `examples/invalid.json` | `age` is a string – shows the error message |
 
 ## Example
 
-Input:
+`person.json`:
 
 ```json
-{"name": "Alice", "age": 30, "email": "alice@example.com", "isActive": true,
- "skills": ["Go", "C++"], "address": {"street": "12 Oak Street", "city": "Sofia"}}
+{
+  "name": "Maria Ivanova",
+  "age": 32,
+  "email": "maria.ivanova@example.com",
+  "isActive": true,
+  "skills": ["C++", "Go", "PostgreSQL", "Linux"],
+  "address": {
+    "street": "10 Rakovski Street",
+    "city": "Sofia"
+  }
+}
 ```
 
-Output:
+Output of `go run .`:
 
 ```
+Read JSON from file: person.json
+
 Parsed values:
-  name:     Alice (string)
-  age:      30 (int)
-  email:    alice@example.com (string)
+  name:     Maria Ivanova (string)
+  age:      32 (int)
+  email:    maria.ivanova@example.com (string)
   isActive: true (bool)
-  skills:   Go, C++ ([]string)
-  street:   12 Oak Street (string)
+  skills:   C++, Go, PostgreSQL, Linux ([]string)
+  street:   10 Rakovski Street (string)
   city:     Sofia (string)
 
 Formatted JSON:
 {
-  "name": "Alice",
-  "age": 30,
+  "name": "Maria Ivanova",
   ...
 }
 ```
 
 ## Errors
 
-| Input | Message |
+| Command | Message |
 |---|---|
-| `{bad` | `Invalid JSON: invalid character 'b' looking for beginning of object key string` |
-| `{"age": "thirty"}` | `Invalid JSON: json: cannot unmarshal string into Go struct field Person.age of type int` |
+| `go run . missing.json` | `Cannot read file: open missing.json: no such file or directory` |
+| `go run . examples/invalid.json` | `Invalid JSON in examples/invalid.json: json: cannot unmarshal string into Go struct field Person.age of type int` |
 
 ## Run
 
 ```bash
-go run .
+go run .                       # reads person.json
+go run . examples/ivan.json    # reads another file
 ```
-
-Paste or type the JSON and press Enter.

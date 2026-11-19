@@ -1,0 +1,11 @@
+{
+  "name": "Maria Ivanova",
+  "age": 32,
+  "email": "maria.ivanova@example.com",
+  "isActive": true,
+  "skills": ["C++", "Go", "PostgreSQL", "Linux"],
+  "address": {
+    "street": "10 Rakovski Street",
+    "city": "Sofia"
+  }
+}

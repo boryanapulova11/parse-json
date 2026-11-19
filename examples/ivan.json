@@ -1,0 +1,11 @@
+{
+  "name": "Ivan Petrov",
+  "age": 45,
+  "email": "ivan.petrov@example.com",
+  "isActive": false,
+  "skills": ["Java", "Docker", "Kubernetes"],
+  "address": {
+    "street": "15 Vitosha Boulevard",
+    "city": "Plovdiv"
+  }
+}

@@ -21,20 +21,31 @@ type Person struct {
 	Address  Address  `json:"address"`
 }
 
+const defaultFile = "person.json"
+
 func main() {
-	fmt.Println("Enter a JSON object (it can span several lines), for example:")
-	fmt.Println(`{"name": "Alice", "age": 30, "email": "alice@example.com", "isActive": true,`)
-	fmt.Println(` "skills": ["Go", "C++"], "address": {"street": "12 Oak Street", "city": "Sofia"}}`)
-	fmt.Println()
+	// The file path can be given as an argument: go run . data/other.json
+	// Without an argument the program reads person.json.
+	path := defaultFile
+	if len(os.Args) > 1 {
+		path = os.Args[1]
+	}
 
-	// The decoder reads from the console until one complete JSON value is entered.
-	decoder := json.NewDecoder(os.Stdin)
-
-	var person Person
-	if err := decoder.Decode(&person); err != nil {
-		fmt.Println("Invalid JSON:", err)
+	// Read the whole file into memory as bytes.
+	data, err := os.ReadFile(path)
+	if err != nil {
+		fmt.Println("Cannot read file:", err)
 		os.Exit(1)
 	}
+
+	// Parse the bytes into the struct.
+	var person Person
+	if err := json.Unmarshal(data, &person); err != nil {
+		fmt.Printf("Invalid JSON in %s: %v\n", path, err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Read JSON from file:", path)
 
 	// Assign the parsed values to separate variables.
 	name := person.Name
